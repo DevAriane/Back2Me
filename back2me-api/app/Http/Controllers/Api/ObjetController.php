@@ -48,8 +48,16 @@ class ObjetController extends Controller
         }
 
         // Tri
+        $allowedOrderBy = ['created_at', 'found_date', 'name', 'status'];
         $orderBy = $request->get('order_by', 'created_at');
-        $orderDir = $request->get('order_dir', 'desc');
+        if (!in_array($orderBy, $allowedOrderBy, true)) {
+            $orderBy = 'created_at';
+        }
+
+        $orderDir = strtolower($request->get('order_dir', 'desc'));
+        if (!in_array($orderDir, ['asc', 'desc'], true)) {
+            $orderDir = 'desc';
+        }
         $query->orderBy($orderBy, $orderDir);
 
         $objets = $query->paginate($request->get('per_page', 15));
@@ -79,11 +87,6 @@ class ObjetController extends Controller
             'photo' => 'nullable|image|max:5120', // 5 Mo max
         ]);
 
-        
-if ($request->hasFile('photo')) {
-    $path = $request->file('photo')->store('objets', 'public');
-    $data['photo_url'] = Storage::url($path);
-}
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
