@@ -22,6 +22,11 @@
                     @error('email')<span class="text-danger">{{ $message }}</span>@enderror
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Téléphone</label>
+                    <input class="form-input" type="text" wire:model="phone" placeholder="Ex: +237 6XXXXXXXX">
+                    @error('phone')<span class="text-danger">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-group">
                     <label class="form-label">Mot de passe</label>
                     <input class="form-input" type="password" wire:model="password" placeholder="••••••••">
                     @error('password')<span class="text-danger">{{ $message }}</span>@enderror

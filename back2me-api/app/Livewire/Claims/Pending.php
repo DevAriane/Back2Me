@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Claim;
 use App\Models\Objet;
+use App\Services\CommissionService;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -17,7 +18,18 @@ class Pending extends Component
     public function approve(Claim $claim)
     {
         $this->authorize('approve', $claim);
+
+        if (!$claim->proof_file_url && !$claim->proof_link) {
+            session()->flash('error', 'Impossible d\'approuver: aucune preuve fournie.');
+            return;
+        }
+        if (!$claim->object_price || (float) $claim->object_price <= 0) {
+            session()->flash('error', 'Impossible d\'approuver: prix de l\'objet manquant.');
+            return;
+        }
+
         $claim->update(['status' => 'approved']);
+        $commission = app(CommissionService::class)->recordFromApprovedClaim($claim, auth()->id());
 
         // Notifier l'utilisateur (si token FCM)
         if ($claim->user->fcm_token) {
@@ -30,7 +42,10 @@ class Pending extends Component
             );
         }
 
-        session()->flash('success', 'Signalement approuvé.');
+        session()->flash(
+            'success',
+            'Signalement approuvé. Commission trouveur: ' . number_format((float) $commission->finder_commission, 0, ',', ' ') . ' FCFA.'
+        );
     }
 
     public function reject(Claim $claim)

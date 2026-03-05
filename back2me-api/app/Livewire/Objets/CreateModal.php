@@ -4,6 +4,7 @@ namespace App\Livewire\Objets;
 
 use App\Models\Category;
 use App\Models\Objet;
+use App\Services\ObjectFoundNotifier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
@@ -67,7 +68,8 @@ class CreateModal extends Component
             $payload['photo_url'] = Storage::url($path);
         }
 
-        Objet::create($payload);
+        $objet = Objet::create($payload);
+        app(ObjectFoundNotifier::class)->notifyAllUsers($objet);
 
         $this->reset(['name', 'category_id', 'location', 'description', 'photo']);
         $this->found_date = now()->toDateString();

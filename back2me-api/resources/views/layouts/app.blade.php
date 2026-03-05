@@ -17,7 +17,11 @@
         </div>
         <nav class="nav-tabs">
             <a href="{{ route('dashboard') }}" class="nav-tab {{ request()->routeIs('dashboard') ? 'active' : '' }}">📊 Tableau de bord</a>
-            <a href="{{ route('objets.index') }}" class="nav-tab {{ request()->routeIs('objets.*') ? 'active' : '' }}">📦 Objets trouvés</a>
+            <a href="{{ route('objets.index', ['status' => 'found']) }}" class="nav-tab {{ request()->routeIs('objets.*') ? 'active' : '' }}">📦 Objets trouvés</a>
+            @if(auth()->user()?->role === 'admin')
+                <a href="{{ route('claims.pending') }}" class="nav-tab {{ request()->routeIs('claims.*') ? 'active' : '' }}">✅ Objets réclamés</a>
+                <a href="{{ route('commissions.index') }}" class="nav-tab {{ request()->routeIs('commissions.*') ? 'active' : '' }}">💰 Commissions</a>
+            @endif
             <a href="{{ route('notifications.index') }}" class="nav-tab {{ request()->routeIs('notifications.*') ? 'active' : '' }}">🔔 Notifications</a>
         </nav>
         <div class="topbar-right">
@@ -26,7 +30,7 @@
                 @csrf
                 <button type="submit" class="nav-tab">Déconnexion</button>
             </form>
-            <div class="avatar">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
+            <div class="avatar">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr(trim(auth()->user()->name), 0, 2)) }}</div>
         </div>
     </header>
     @endauth

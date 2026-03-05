@@ -56,10 +56,24 @@
                 </thead>
                 <tbody>
                     @forelse($latestObjets as $objet)
+                    @php
+                        $photoUrl = null;
+                        if (!empty($objet->photo_url)) {
+                            $photoUrl = str_starts_with($objet->photo_url, 'http')
+                                ? $objet->photo_url
+                                : asset(ltrim($objet->photo_url, '/'));
+                        }
+                    @endphp
                     <tr>
                         <td>
                             <div class="obj-name">
-                                <div class="obj-emoji">📦</div>
+                                <div class="obj-emoji">
+                                    @if($photoUrl)
+                                        <img src="{{ $photoUrl }}" alt="Photo de {{ $objet->name }}" loading="lazy">
+                                    @else
+                                        📦
+                                    @endif
+                                </div>
                                 {{ $objet->name }}
                             </div>
                         </td>

@@ -1,4 +1,4 @@
-<div class="page">
+<div class="page" wire:poll.10s>
     <div class="page-header" style="display:flex; align-items:center; justify-content:space-between;">
         <div>
             <div class="page-title">Objets trouvés</div>
@@ -41,9 +41,20 @@
                 $index = $loop->index % 6;
                 $emoji = $emojis[$index];
                 $bg = $bgs[$index];
+                $photoUrl = null;
+                if (!empty($objet->photo_url)) {
+                    $photoUrl = str_starts_with($objet->photo_url, 'http')
+                        ? $objet->photo_url
+                        : asset(ltrim($objet->photo_url, '/'));
+                }
             @endphp
             <a class="item-card" href="{{ route('objets.show', $objet) }}">
-                <div class="item-img {{ $bg }}">{{ $emoji }}
+                <div class="item-img {{ $photoUrl ? 'has-photo' : $bg }}">
+                    @if($photoUrl)
+                        <img src="{{ $photoUrl }}" alt="Photo de {{ $objet->name }}" loading="lazy">
+                    @else
+                        {{ $emoji }}
+                    @endif
                     <div class="item-badge-pos">
                         @if($objet->status === 'returned')
                             <span class="badge returned"><span class="badge-dot"></span>Rendu</span>

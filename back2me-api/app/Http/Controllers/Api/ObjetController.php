@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Objet;
 use App\Models\Category;
-use App\Services\FirebaseNotificationService;
+use App\Services\ObjectFoundNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -103,18 +103,7 @@ class ObjetController extends Controller
 
         $objet = Objet::create($data);
 
-        // Notifier tous les utilisateurs (sauf le déposant ?)
-        try {
-            $firebase = new FirebaseNotificationService();
-            $firebase->sendToAll(
-                'Nouvel objet trouvé',
-                "Un(e) {$objet->name} a été trouvé(e) à {$objet->location}.",
-                ['objet_id' => $objet->id, 'type' => 'new_object']
-            );
-        } catch (\Exception $e) {
-            // Log l'erreur mais ne bloque pas la création
-            \Log::error('Erreur envoi notification Firebase: ' . $e->getMessage());
-        }
+        app(ObjectFoundNotifier::class)->notifyAllUsers($objet);
 
         return response()->json($objet->load('category', 'user'), 201);
     }
@@ -125,6 +114,7 @@ class ObjetController extends Controller
     public function update(Request $request, Objet $objet)
     {
         $this->authorize('update', $objet); // Optionnel: politique d'accès
+        $oldStatus = $objet->status;
 
         $validator = Validator::make($request->all(), [
             'category_id' => 'sometimes|exists:categories,id',
@@ -154,6 +144,9 @@ class ObjetController extends Controller
         }
 
         $objet->update($data);
+        if (($data['status'] ?? null) === 'returned' && $oldStatus !== 'returned') {
+            app(ObjectFoundNotifier::class)->notifyAllUsersObjectReturned($objet);
+        }
 
         return response()->json($objet->load('category', 'user'));
     }
@@ -179,7 +172,12 @@ class ObjetController extends Controller
      */
     public function markReturned(Objet $objet)
     {
+        if ($objet->status === 'returned') {
+            return response()->json(['message' => 'Objet déjà rendu.']);
+        }
+
         $objet->update(['status' => 'returned']);
+        app(ObjectFoundNotifier::class)->notifyAllUsersObjectReturned($objet);
 
         // Option : notifier le propriétaire si un claim a été approuvé
         // ...

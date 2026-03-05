@@ -13,14 +13,14 @@ class Index extends Component
 
     public $search = '';
     public $category_id = '';
-    public $status = '';
+    public $status = 'found';
     public $date_from = '';
     public $date_to = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'category_id' => ['except' => ''],
-        'status' => ['except' => ''],
+        'status' => ['except' => 'found'],
         'date_from' => ['except' => ''],
         'date_to' => ['except' => ''],
     ];
