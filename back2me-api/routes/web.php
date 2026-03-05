@@ -4,6 +4,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Commissions\Index as CommissionsIndex;
 use App\Livewire\Dashboard;
+use App\Livewire\Claims\Show as ClaimShow;
 use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Livewire\Objets\Index as ObjetsIndex;
 use App\Livewire\Objets\Show as ObjetShow;
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/objets/{objet}', ObjetShow::class)->name('objets.show');
     Route::get('/notifications', NotificationsIndex::class)->name('notifications.index');
     Route::get('/claims/pending', ClaimsPending::class)->name('claims.pending')->middleware('can:viewPending,App\Models\Claim');
+    Route::get('/claims/{claim}', ClaimShow::class)->name('claims.show')->middleware('can:view,claim');
     Route::get('/commissions', CommissionsIndex::class)->name('commissions.index')->middleware('admin');
     Route::get('/users', UsersIndex::class)->name('users.index')->middleware('can:viewAny,App\Models\User');
 });

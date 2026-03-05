@@ -5,10 +5,22 @@
             <div class="page-sub">Bienvenue, {{ auth()->user()->name }} · {{ now()->translatedFormat('l d M Y') }}</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
-            <span class="screen-label">Vue Admin</span>
+            <span class="screen-label">{{ auth()->user()->role === 'admin' ? 'Vue Admin' : 'Vue Utilisateur' }}</span>
             <button class="btn btn-primary" type="button" onclick="openAddObjetModal()">+ Ajouter un objet</button>
         </div>
     </div>
+
+    @if(auth()->user()->role !== 'admin')
+        <div class="table-card" style="padding:18px 20px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div class="card-title">Ma commission à retirer</div>
+                <div style="font-size:13px;color:var(--slate);margin-top:4px;">Retrait auprès du surveillant général</div>
+            </div>
+            <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--teal);">
+                {{ number_format((float) $myPendingCommission, 0, ',', ' ') }} FCFA
+            </div>
+        </div>
+    @endif
 
     <div class="stats-grid">
         <div class="stat-card blue">
@@ -103,24 +115,35 @@
         <div class="right-col">
             <div class="chart-card">
                 <div class="card-header">
-                    <span class="card-title">Activité mensuelle</span>
+                    <span class="card-title">Courbe réelle des objets trouvés / mois</span>
                     <span style="font-size:12px;color:var(--slate);">{{ now()->year }}</span>
                 </div>
-                <div class="chart-bars">
+                <div style="padding:16px 16px 8px;">
                     @php
-                        $bars = [35, 45, 38, 52, 60, 74];
-                        $months = ['Sep', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév'];
+                        $count = max(1, count($monthlyActivity));
+                        $points = collect($monthlyActivity)->map(function ($row, $i) use ($count, $monthlyMax) {
+                            $x = $count === 1 ? 190 : (10 + (($i * 360) / ($count - 1)));
+                            $ratio = $monthlyMax > 0 ? ($row['value'] / $monthlyMax) : 0;
+                            $y = 150 - ($ratio * 130);
+                            return ['x' => round($x, 2), 'y' => round($y, 2), 'label' => $row['label'], 'value' => $row['value']];
+                        })->values();
+                        $polyline = $points->map(fn($p) => $p['x'].','.$p['y'])->implode(' ');
                     @endphp
-                    @foreach($bars as $idx => $height)
-                        <div class="bar-wrap">
-                            <div class="bar" style="height:{{ $height }}%;background:{{ $idx === 5 ? 'linear-gradient(180deg,var(--teal) 0%,var(--teal-2) 100%)' : 'var(--navy)' }};"></div>
-                            <div class="bar-label">{{ $months[$idx] }}</div>
+                    <svg viewBox="0 0 380 170" width="100%" height="170" aria-label="Courbe activité mensuelle">
+                        <line x1="10" y1="150" x2="370" y2="150" stroke="#CBD5E1" stroke-width="1" />
+                        <polyline points="{{ $polyline }}" fill="none" stroke="#0FC6C2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        @foreach($points as $p)
+                            <circle cx="{{ $p['x'] }}" cy="{{ $p['y'] }}" r="4.5" fill="#132053"></circle>
+                        @endforeach
+                    </svg>
+                </div>
+                <div style="padding:0 20px 16px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;">
+                    @foreach($monthlyActivity as $row)
+                        <div style="text-align:center;">
+                            <div style="font-size:12px;font-weight:700;color:var(--navy);">{{ $row['value'] }}</div>
+                            <div style="font-size:11px;color:var(--slate);">{{ $row['label'] }}</div>
                         </div>
                     @endforeach
-                </div>
-                <div style="padding:0 20px 16px;display:flex;gap:16px;">
-                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--slate);"><span style="width:10px;height:10px;background:var(--navy);border-radius:3px;display:inline-block;"></span>Précédents</div>
-                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--slate);"><span style="width:10px;height:10px;background:var(--teal);border-radius:3px;display:inline-block;"></span>Ce mois</div>
                 </div>
             </div>
 

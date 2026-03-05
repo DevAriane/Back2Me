@@ -5,7 +5,6 @@ namespace App\Livewire\Objets;
 use Livewire\Component;
 use App\Models\Objet;
 use App\Models\Claim;
-use App\Services\ObjectFoundNotifier;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -67,16 +66,9 @@ class Show extends Component
 
     public function markReturned()
     {
-        $this->authorize('update', $this->objet); // suppose que vous avez une policy
-
-        if ($this->objet->status === 'returned') {
-            session()->flash('error', 'Cet objet est déjà marqué comme rendu.');
-            return;
-        }
-
-        $this->objet->update(['status' => 'returned']);
-        app(ObjectFoundNotifier::class)->notifyAllUsersObjectReturned($this->objet);
-        session()->flash('success', 'Objet marqué comme rendu.');
+        $this->authorize('update', $this->objet);
+        return redirect()->route('claims.pending', ['objet_id' => $this->objet->id])
+            ->with('success', 'Consultez d\'abord le dossier de réclamation avant de valider "objet rendu".');
     }
 
     public function delete()

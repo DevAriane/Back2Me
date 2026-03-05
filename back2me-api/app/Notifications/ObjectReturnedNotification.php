@@ -13,6 +13,7 @@ class ObjectReturnedNotification extends Notification
         public int $objetId,
         public string $name,
         public string $location,
+        public ?string $claimerName = null,
         public ?string $photoUrl = null,
     ) {
     }
@@ -33,10 +34,13 @@ class ObjectReturnedNotification extends Notification
         return [
             'type' => 'returned_object',
             'title' => 'Objet rendu',
-            'body' => "L'objet {$this->name} a ete rendu.",
+            'body' => $this->claimerName
+                ? "L'objet {$this->name} a ete rendu au nom de {$this->claimerName}."
+                : "L'objet {$this->name} a ete rendu.",
             'objet_id' => $this->objetId,
             'name' => $this->name,
             'location' => $this->location,
+            'claimer_name' => $this->claimerName,
             'photo_url' => $this->photoUrl,
             'action_url' => route('objets.show', ['objet' => $this->objetId]),
         ];

@@ -1,5 +1,8 @@
 <div>
-    <h1 class="text-2xl font-bold mb-6">Objets réclamés (en attente de validation)</h1>
+    <h1 class="text-2xl font-bold mb-6">Objets réclamés (dossiers à consulter)</h1>
+    @if($objet_id)
+        <div class="text-sm text-gray-600 mb-4">Filtre objet ID: #{{ $objet_id }}</div>
+    @endif
 
     @if(session()->has('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{{ session('success') }}</div>
@@ -17,6 +20,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Message</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix déclaré</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preuve</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
@@ -37,7 +41,12 @@
                             {{ $claim->objet->name }}
                         </a>
                     </td>
-                    <td class="px-6 py-4">{{ $claim->user->name }}<br><span class="text-sm text-gray-500">{{ $claim->user->email }}</span></td>
+                    <td class="px-6 py-4">
+                        {{ $claim->user->name }}<br>
+                        <span class="text-sm text-gray-500">{{ $claim->user->email }}</span><br>
+                        <span class="text-sm text-gray-500">{{ $claim->user->phone ?? '-' }}</span><br>
+                        <span class="text-sm text-gray-500">{{ ($claim->user->niveau ?? '-') . ' · ' . ($claim->user->filiere ?? '-') }}</span>
+                    </td>
                     <td class="px-6 py-4">{{ $claim->message ?? '—' }}</td>
                     <td class="px-6 py-4">{{ $claim->object_price ? number_format((float) $claim->object_price, 0, ',', ' ') . ' FCFA' : '—' }}</td>
                     <td class="px-6 py-4">
@@ -54,15 +63,25 @@
                             <span class="text-gray-400">—</span>
                         @endif
                     </td>
+                    <td class="px-6 py-4">
+                        @if($claim->status === 'approved')
+                            <span class="text-green-700 font-semibold">Approuvé</span>
+                        @else
+                            <span class="text-amber-700 font-semibold">En attente</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4">{{ $claim->created_at->format('d/m/Y H:i') }}</td>
                     <td class="px-6 py-4">
-                        <button wire:click="approve({{ $claim->id }})" class="text-green-600 hover:text-green-900 mr-3">Approuver</button>
-                        <button wire:click="reject({{ $claim->id }})" wire:confirm="Confirmer le rejet ?" class="text-red-600 hover:text-red-900">Rejeter</button>
+                        <a href="{{ route('claims.show', $claim) }}" class="text-indigo-600 hover:underline mr-3">Consulter</a>
+                        @if($claim->status === 'pending')
+                            <button wire:click="approve({{ $claim->id }})" class="text-green-600 hover:text-green-900 mr-3">Approuver rapide</button>
+                            <button wire:click="reject({{ $claim->id }})" wire:confirm="Confirmer le rejet ?" class="text-red-600 hover:text-red-900">Rejeter</button>
+                        @endif
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">Aucun signalement en attente.</td>
+                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">Aucun signalement en attente.</td>
                 </tr>
                 @endforelse
             </tbody>

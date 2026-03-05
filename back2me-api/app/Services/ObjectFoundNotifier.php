@@ -37,12 +37,13 @@ class ObjectFoundNotifier
         }
     }
 
-    public function notifyAllUsersObjectReturned(Objet $objet): void
+    public function notifyAllUsersObjectReturned(Objet $objet, ?string $claimerName = null): void
     {
         $payload = new ObjectReturnedNotification(
             objetId: $objet->id,
             name: $objet->name,
             location: $objet->location,
+            claimerName: $claimerName,
             photoUrl: $objet->photo_url,
         );
 
@@ -54,7 +55,9 @@ class ObjectFoundNotifier
             $firebase = new FirebaseNotificationService();
             $firebase->sendToAll(
                 'Objet rendu',
-                "L'objet {$objet->name} a ete rendu.",
+                $claimerName
+                    ? "L'objet {$objet->name} a ete rendu au nom de {$claimerName}."
+                    : "L'objet {$objet->name} a ete rendu.",
                 ['objet_id' => (string) $objet->id, 'type' => 'object_returned']
             );
         } catch (\Throwable $e) {

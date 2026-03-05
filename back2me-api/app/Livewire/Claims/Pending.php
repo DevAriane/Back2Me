@@ -5,7 +5,6 @@ namespace App\Livewire\Claims;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Claim;
-use App\Models\Objet;
 use App\Services\CommissionService;
 use App\Services\FirebaseNotificationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -14,6 +13,12 @@ class Pending extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
+
+    public $objet_id = null;
+
+    protected $queryString = [
+        'objet_id' => ['except' => null],
+    ];
 
     public function approve(Claim $claim)
     {
@@ -70,7 +75,13 @@ class Pending extends Component
     public function render()
     {
         $claims = Claim::with(['objet', 'user'])
-                       ->where('status', 'pending')
+                       ->whereIn('status', ['pending', 'approved'])
+                       ->whereHas('objet', function ($query) {
+                           $query->where('status', '!=', 'returned');
+                       })
+                       ->when($this->objet_id, function ($query) {
+                           $query->where('objet_id', $this->objet_id);
+                       })
                        ->orderBy('created_at', 'desc')
                        ->paginate(10);
 

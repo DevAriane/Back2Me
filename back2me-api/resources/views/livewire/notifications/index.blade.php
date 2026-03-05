@@ -17,10 +17,22 @@
                 $notifType = $data['type'] ?? '';
                 $icon = $notifType === 'found_object' ? '📦' : ($notifType === 'returned_object' ? '✅' : '🔔');
                 $iconClass = $notifType === 'found_object' ? 'info' : ($notifType === 'returned_object' ? 'match' : 'match');
+                $photoUrl = null;
+                if (!empty($data['photo_url'])) {
+                    $photoUrl = str_starts_with($data['photo_url'], 'http')
+                        ? $data['photo_url']
+                        : asset(ltrim($data['photo_url'], '/'));
+                }
             @endphp
 
             <div class="notif-item {{ $isUnread ? 'unread' : '' }}">
-                <div class="notif-icon-wrap {{ $iconClass }}">{{ $icon }}</div>
+                @if($photoUrl)
+                    <div class="notif-thumb">
+                        <img src="{{ $photoUrl }}" alt="Photo objet notification" loading="lazy">
+                    </div>
+                @else
+                    <div class="notif-icon-wrap {{ $iconClass }}">{{ $icon }}</div>
+                @endif
                 <div class="notif-content">
                     <div class="notif-title">{{ $title }}</div>
                     <div class="notif-desc">{{ $body }}</div>

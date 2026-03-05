@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Claim;
 use App\Models\Objet;
 use App\Models\Category;
 use App\Services\ObjectFoundNotifier;
@@ -145,7 +146,16 @@ class ObjetController extends Controller
 
         $objet->update($data);
         if (($data['status'] ?? null) === 'returned' && $oldStatus !== 'returned') {
-            app(ObjectFoundNotifier::class)->notifyAllUsersObjectReturned($objet);
+            $approvedClaim = Claim::with('user')
+                ->where('objet_id', $objet->id)
+                ->where('status', 'approved')
+                ->latest('id')
+                ->first();
+
+            app(ObjectFoundNotifier::class)->notifyAllUsersObjectReturned(
+                $objet,
+                $approvedClaim?->user?->name
+            );
         }
 
         return response()->json($objet->load('category', 'user'));
@@ -177,7 +187,16 @@ class ObjetController extends Controller
         }
 
         $objet->update(['status' => 'returned']);
-        app(ObjectFoundNotifier::class)->notifyAllUsersObjectReturned($objet);
+        $approvedClaim = Claim::with('user')
+            ->where('objet_id', $objet->id)
+            ->where('status', 'approved')
+            ->latest('id')
+            ->first();
+
+        app(ObjectFoundNotifier::class)->notifyAllUsersObjectReturned(
+            $objet,
+            $approvedClaim?->user?->name
+        );
 
         // Option : notifier le propriétaire si un claim a été approuvé
         // ...

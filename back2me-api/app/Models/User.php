@@ -13,6 +13,28 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    public const FILIERE_OPTIONS = [
+        'Informatique',
+        'Réseaux et télécoms',
+        'Génie logiciel',
+        'Comptabilité',
+        'Finance',
+        'Marketing',
+        'Gestion',
+        'Droit',
+        'Autre',
+    ];
+
+    public const NIVEAU_OPTIONS = [
+        'L1',
+        'L2',
+        'L3',
+        'M1',
+        'M2',
+        'Doctorat',
+        'Autre',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -22,6 +44,8 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'filiere',
+        'niveau',
         'password',
         'role',
         'fcm_token',

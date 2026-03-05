@@ -21,7 +21,7 @@ class ClaimPolicy
      */
     public function view(User $user, Claim $claim): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 
     /**

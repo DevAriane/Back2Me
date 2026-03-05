@@ -8,6 +8,8 @@ use App\Models\Commission;
 class CommissionService
 {
     public const TOTAL_RATE = 0.25; // 25% du prix
+    public const PRICE_THRESHOLD = 20000.0; // seuil de plafond
+    public const FIXED_COMMISSION_AT_THRESHOLD = 5000.0; // commission fixe si prix >= seuil
     public const FINDER_SHARE_OF_TOTAL = 0.50; // 50% des 25%
     public const SUPERVISOR_SHARE_OF_REMAINING = 0.50; // 50% de la moitié restante
 
@@ -16,7 +18,9 @@ class CommissionService
      */
     public function calculate(float $objectPrice): array
     {
-        $commissionTotal = round($objectPrice * self::TOTAL_RATE, 2);
+        $commissionTotal = $objectPrice >= self::PRICE_THRESHOLD
+            ? self::FIXED_COMMISSION_AT_THRESHOLD
+            : round($objectPrice * self::TOTAL_RATE, 2);
         $finder = round($commissionTotal * self::FINDER_SHARE_OF_TOTAL, 2);
         $remaining = round($commissionTotal - $finder, 2);
         $supervisor = round($remaining * self::SUPERVISOR_SHARE_OF_REMAINING, 2);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -19,6 +20,8 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:30',
+            'filiere' => ['required', 'string', Rule::exists('filieres', 'name')],
+            'niveau' => ['required', 'string', Rule::exists('niveaux', 'name')],
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -26,6 +29,8 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
+            'filiere' => $validated['filiere'],
+            'niveau' => $validated['niveau'],
             'password' => Hash::make($validated['password']),
             'role' => 'user',
         ]);

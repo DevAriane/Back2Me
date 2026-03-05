@@ -165,6 +165,8 @@
   .notif-icon-wrap.match { background: #ECFDF5; }
   .notif-icon-wrap.info { background: #EFF6FF; }
   .notif-icon-wrap.alert { background: #FFF7ED; }
+  .notif-thumb { width: 44px; height: 44px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; background: #e2e8f0; }
+  .notif-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .notif-content { flex: 1; }
   .notif-title { font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
   .notif-desc { font-size: 13px; color: var(--slate); line-height: 1.5; }

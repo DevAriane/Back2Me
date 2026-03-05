@@ -89,7 +89,7 @@
                 <h4>🛠 Actions administrateur</h4>
                 <div class="action-btn-group">
                     @if($objet->status !== 'returned')
-                        <button class="action-btn-item success" wire:click="markReturned">✅ Marquer comme rendu</button>
+                        <button class="action-btn-item success" wire:click="markReturned">📋 Consulter objets réclamés</button>
                     @endif
                     <button class="action-btn-item danger" wire:click="delete" wire:confirm="Êtes-vous sûr de vouloir supprimer cet objet ?">🗑 Supprimer l'objet</button>
                 </div>

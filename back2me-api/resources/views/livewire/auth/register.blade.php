@@ -27,6 +27,26 @@
                     @error('phone')<span class="text-danger">{{ $message }}</span>@enderror
                 </div>
                 <div class="form-group">
+                    <label class="form-label">Filière</label>
+                    <select class="form-input" wire:model="filiere">
+                        <option value="">Sélectionner une filière</option>
+                        @foreach($filiereOptions as $option)
+                            <option value="{{ $option }}">{{ $option }}</option>
+                        @endforeach
+                    </select>
+                    @error('filiere')<span class="text-danger">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Niveau</label>
+                    <select class="form-input" wire:model="niveau">
+                        <option value="">Sélectionner un niveau</option>
+                        @foreach($niveauOptions as $option)
+                            <option value="{{ $option }}">{{ $option }}</option>
+                        @endforeach
+                    </select>
+                    @error('niveau')<span class="text-danger">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-group">
                     <label class="form-label">Mot de passe</label>
                     <input class="form-input" type="password" wire:model="password" placeholder="••••••••">
                     @error('password')<span class="text-danger">{{ $message }}</span>@enderror

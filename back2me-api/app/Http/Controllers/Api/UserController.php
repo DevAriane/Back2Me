@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -38,6 +39,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:30',
+            'filiere' => ['required', 'string', Rule::exists('filieres', 'name')],
+            'niveau' => ['required', 'string', Rule::exists('niveaux', 'name')],
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:user,admin',
         ]);
@@ -50,6 +53,8 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'filiere' => $request->filiere,
+            'niveau' => $request->niveau,
             'password' => Hash::make($request->password),
             'role' => $request->role,
         ]);
@@ -68,6 +73,8 @@ class UserController extends Controller
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'sometimes|string|max:30',
+            'filiere' => ['sometimes', 'string', Rule::exists('filieres', 'name')],
+            'niveau' => ['sometimes', 'string', Rule::exists('niveaux', 'name')],
             'password' => 'sometimes|string|min:8|confirmed',
             'role' => 'sometimes|in:user,admin',
         ]);
