@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Validator;
 
 class ObjetController extends Controller
 {
+    private function buildPublicFileUrl(Request $request, string $path): string
+    {
+        return rtrim($request->getSchemeAndHttpHost(), '/') . Storage::url($path);
+    }
+
     /**
      * Liste paginée des objets avec filtres
      */
@@ -86,6 +91,7 @@ class ObjetController extends Controller
             'location' => 'required|string|max:255',
             'found_date' => 'required|date',
             'photo' => 'nullable|image|max:5120', // 5 Mo max
+            'image' => 'nullable|image|max:5120', // alias mobile
         ]);
 
         if ($validator->fails()) {
@@ -97,9 +103,10 @@ class ObjetController extends Controller
         $data['status'] = 'found';
 
         // Upload photo si présente
-        if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('objets', 'public');
-            $data['photo_url'] = Storage::url($path);
+        $uploadedPhoto = $request->file('photo') ?: $request->file('image');
+        if ($uploadedPhoto) {
+            $path = $uploadedPhoto->store('objets', 'public');
+            $data['photo_url'] = $this->buildPublicFileUrl($request, $path);
         }
 
         $objet = Objet::create($data);
@@ -125,6 +132,7 @@ class ObjetController extends Controller
             'found_date' => 'sometimes|date',
             'status' => 'sometimes|in:found,returned,unclaimed',
             'photo' => 'nullable|image|max:5120',
+            'image' => 'nullable|image|max:5120', // alias mobile
         ]);
 
         if ($validator->fails()) {
@@ -134,14 +142,15 @@ class ObjetController extends Controller
         $data = $validator->validated();
 
         // Gérer nouvelle photo
-        if ($request->hasFile('photo')) {
+        $uploadedPhoto = $request->file('photo') ?: $request->file('image');
+        if ($uploadedPhoto) {
             // Supprimer ancienne photo si existante
             if ($objet->photo_url) {
                 $oldPath = str_replace('/storage/', '', $objet->photo_url);
                 Storage::disk('public')->delete($oldPath);
             }
-            $path = $request->file('photo')->store('objets', 'public');
-            $data['photo_url'] = Storage::url($path);
+            $path = $uploadedPhoto->store('objets', 'public');
+            $data['photo_url'] = $this->buildPublicFileUrl($request, $path);
         }
 
         $objet->update($data);

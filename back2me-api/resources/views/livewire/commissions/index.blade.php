@@ -14,11 +14,11 @@
     @endif
 
     <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
-        <div class="stat-card teal">
+        <!-- <div class="stat-card teal">
             <div class="stat-label">Part trouveurs à payer</div>
             <div class="stat-value" style="font-size:24px;">{{ number_format((float) $summary->total_finder_pending, 0, ',', ' ') }}</div>
             <div class="stat-change up">FCFA</div>
-        </div>
+        </div> -->
         <div class="stat-card blue">
             <div class="stat-label">Part surveillant (cumul)</div>
             <div class="stat-value" style="font-size:24px;">{{ number_format((float) $summary->total_supervisor, 0, ',', ' ') }}</div>
